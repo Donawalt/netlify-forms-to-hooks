@@ -1,0 +1,9 @@
+{
+    "type": "module",
+    "name": "netlify-forms-to-hooks",
+    "version": "0.0.1",
+    "dependencies": {
+        "cheerio": "^1.0.0-rc.12",
+        "node-fetch": "^3.3.1"
+      }
+}
