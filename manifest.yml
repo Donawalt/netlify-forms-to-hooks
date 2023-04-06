@@ -1,1 +1,4 @@
 name: netlify-forms-to-hooks
+inputs:
+  - name: netlify_key
+    description: API key of your netlify account 

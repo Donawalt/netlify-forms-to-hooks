@@ -4,8 +4,8 @@ import cheerio from 'cheerio';
 import fetch from 'node-fetch';
 
 
-async function handleNetlifyForms(forms, constants) {
-    let netlifyApiToken = constants.NETLIFY_API_TOKEN;
+async function handleNetlifyForms(forms, constants, inputs) {
+    let netlifyApiToken = inputs?.netlify_key ? inputs?.netlify_key : constants.NETLIFY_API_TOKEN;
     let netlifyApiHost = 'https://' + constants.NETLIFY_API_HOST + '/api/v1/';
     let siteID = constants.SITE_ID;
 
@@ -49,16 +49,17 @@ async function handleNetlifyForms(forms, constants) {
         let currentDomForm = forms.find(el => el.name === element.name);
 
         // Logs
-        console.log("Current Hooks", currentHooks, currentHooks[0].data.email);
+        console.log("Current Hooks", currentHooks);
         console.log("Current DOM Form", currentDomForm);
 
         // If hooks with the existing mail in currentDomForm all ready existing do nothing 
-        if (currentHooks && currentHooks.some(hook => hook.data.email === currentDomForm.to)) {
+        if (currentHooks && currentHooks.some(hook => hook?.data?.email === currentDomForm?.to)) {
             // return async 
             console.log("The hook is all ready existing !!");
         } else {
             console.log("Create the new hook");
             // else create the New Hooks 
+
             /*                 
             DATA Form to send 
                 {
@@ -150,8 +151,9 @@ async function findAllForm(file) {
     return results;
 }
 
-export const onPostBuild = async function ({ constants, utils }) {
+export const onSuccess = async function ({ constants, utils, inputs }) {
     try {
+        console.log(constants)
         let allHtmlFiles = await findHtmlFiles(constants.PUBLISH_DIR).catch(error => console.error(error));
         console.log("All Html files", allHtmlFiles);
         console.log("You get " + allHtmlFiles.length + " files");
@@ -159,9 +161,9 @@ export const onPostBuild = async function ({ constants, utils }) {
         let allForms = await Promise.all(allHtmlFiles.map(findAllForm));
         allForms = allForms.filter(el => el.length > 0).flat();
 
-        let forms = await handleNetlifyForms(allForms, constants);
+        let forms = await handleNetlifyForms(allForms, constants, inputs);
     } catch (error) {
         console.error(error);
-        utils.build.failBuild("YOUR_FAILURE_MESSAGE", { error });
+        utils.build.failPluginBuild("YOUR_FAILURE_MESSAGE", { error });
     }
 }
